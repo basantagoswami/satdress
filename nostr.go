@@ -10,7 +10,11 @@ import (
 )
 
 func GetNostrPubkey(name, domain string) (string, error) {
-	return "e0d05a5b8c7789eb83f87672f4eb0dca78f99292ab038e5c66f84d97d77b95ae", nil
+	params, _ := GetName(name, domain)
+	if params.NPub == "" {
+		return "", nil
+	}
+	return params.NPub, nil
 }
 
 func handleNostr(w http.ResponseWriter, r *http.Request) {
