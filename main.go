@@ -43,6 +43,9 @@ var (
 //go:embed index.html
 var indexHTML string
 
+//go:embed nostr.html
+var nostrHTML string
+
 //go:embed grab.html
 var grabHTML string
 
@@ -78,6 +81,9 @@ func main() {
 
 	router.Path("/.well-known/lnurlp/{user}").Methods("GET").
 		HandlerFunc(handleLNURL)
+
+	router.Path("/.well-known/nostr.json").Methods("GET").
+		HandlerFunc(handleNostr)
 
 	router.Path("/").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +133,45 @@ func main() {
 				Name         string `json:"name"`
 				ActualDomain string `json:"actual_domain"`
 			}{pin, inv, name, domain})
+		},
+	)
+
+	router.Path("/nostr").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			name := r.FormValue("name")
+			if name == "" || r.FormValue("pubkey") == "" {
+				sendError(w, 500, "internal error")
+				return
+			}
+
+			// might not get domain back
+			domain := r.FormValue("domain")
+			if domain == "" {
+				if !strings.Contains(s.Domain, ",") {
+					domain = s.Domain
+				} else {
+					sendError(w, 500, "internal error")
+					return
+				}
+			}
+
+			pin, _, err := SaveName(name, domain, &Params{
+				Name: r.FormValue("name"),
+				NPub: r.FormValue("pubkey"),
+			}, r.FormValue("pin"))
+			if err != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, err.Error())
+				return
+			}
+
+			fmt.Println("PIN", pin)
+
+			renderHTML(w, nostrHTML, struct {
+				PIN          string `json:"pin"`
+				Name         string `json:"name"`
+				ActualDomain string `json:"actual_domain"`
+			}{pin, name, domain})
 		},
 	)
 

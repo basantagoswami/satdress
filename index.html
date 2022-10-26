@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Satdress - Federated Lightning Address Server</title>
+    <title>Satdress - Federated Lightning & Nostr Address Server</title>
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" href="https://i.imgur.com/4yaPtA2.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,13 +15,14 @@
   <body>
     <main id="main">
       <div class="title">{{ siteName }}</div>
-      <div class="tagline">Federated Lightning Address Server</div>
+      <div class="tagline">Federated Lightning & Nostr Address Server</div>
       <div class="owner">
         <a class="owner-button" :href="siteOwnerURL" target="_blank">
           Brought to you by <span class="owner-name">{{ siteOwnerName }}</span>
         </a>
       </div>
       <div class="card">
+        <!-- Lightning -->
         <div class="description">
           Use the form below to connect your own node to a
           <b>Lightning Address</b>.
@@ -164,8 +165,62 @@
           </div>
           <button class="submit">Submit</button>
         </form>
+
+        <br />
+        <hr />
+        <br />
+
+        <!-- Nostr -->
+        <div class="description">
+          Get a
+          <a href="https://github.com/nostr-protocol/nostr/" target="_blank">
+            nostr
+          </a>
+          address (aka NIP-05 identifier) instead
+        </div>
+        <form action="/nostr" method="post">
+          <div class="field">
+            <div class="row">
+              <label for="name"> {{usernameInfo}} </label>
+            </div>
+            <div class="domain-wrapper">
+              <input class="input" name="name" id="name" />
+              <span v-if="domains.length == 1">@{{ domains[0] }}</span>
+              <span v-if="domains.length > 1">@</span>
+              <select name="domain" id="domain" v-if="domains.length > 1">
+                <option v-for="domain in domains" :value="domain">
+                  {{ domain }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pubkey"> Nostr Public Key </label>
+            <input class="input full-width" name="pubkey" id="pubkey" />
+          </div>
+          <div class="field">
+            <label style="float: right">
+              This is a new Nostr Address
+              <input type="checkbox" v-model="isNew" />
+            </label>
+          </div>
+          <br />
+          <div class="field" v-if="!isNew">
+            <label for="pin"> Secret PIN </label>
+            <input class="input full-width" name="pin" id="pin" />
+          </div>
+          <button class="submit">Submit</button>
+        </form>
       </div>
+
       <div class="resources">
+        <a
+          class="resource-button"
+          href="https://github.com/nostr-protocol/nips/blob/master/05.md"
+          target="_blank"
+        >
+          Nostr Address (NIP-05 identifier) Documentation
+        </a>
         <a
           class="resource-button"
           href="https://github.com/andrerfneves/lightning-address#readme"

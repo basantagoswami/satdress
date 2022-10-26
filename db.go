@@ -18,6 +18,8 @@ type Params struct {
 	Domain string `json:"domain,omitempty"`
 	Kind   string `json:"kind"`
 
+	NPub string `json:"npub"` // nostr pub key
+
 	Host   string `json:"host"`
 	Key    string `json:"key"`
 	Pak    string `json:"pak"`
@@ -56,9 +58,14 @@ func SaveName(
 	params.Name = name
 	params.Domain = domain
 
-	// check if the given data works
-	if inv, err = makeInvoice(params, 1000, &pin); err != nil {
-		return "", "", fmt.Errorf("couldn't make an invoice with the given data: %w", err)
+	// Only check for invoice if it is not nostr related
+	if params.NPub == "" {
+		// check if the given data works
+		if inv, err = makeInvoice(params, 1000, &pin); err != nil {
+			return "", "", fmt.Errorf("couldn't make an invoice with the given data: %w", err)
+		}
+	} else {
+		inv = ""
 	}
 
 	// save it
